@@ -3,8 +3,6 @@ package domain
 /**
   * @author Romesh Selvan
   */
-case class GalleryLink(url : String)
-
 case class Project(projectId : String,
                    projectTitle : String,
                    titleImageLink : String,

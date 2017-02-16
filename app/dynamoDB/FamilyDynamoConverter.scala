@@ -10,19 +10,19 @@ import tableFields.FamiliesFieldNames._
 object FamilyDynamoConverter extends DynamoDBConverter {
 
   def apply(item : Item) : Family = {
-    Family(item.getString(EMAIL.toString),
-      item.getString(FIRST_NAME.toString),
-      item.getString(LAST_NAME.toString),
-      item.getBoolean(ARE_ATTENDING.toString),
-      item.getInt(NUMBER_ATTENDING.toString))
+    Family(item.getString(EMAIL),
+      item.getString(FIRST_NAME),
+      item.getString(LAST_NAME),
+      item.getBoolean(ARE_ATTENDING),
+      item.getInt(NUMBER_ATTENDING))
   }
 
   def apply(family: Family) : Item = {
     new Item()
-      .withString(EMAIL.toString, family.email)
-      .withString(FIRST_NAME.toString, family.firstName)
-      .withString(LAST_NAME.toString, family.lastName)
-      .withBoolean(ARE_ATTENDING.toString, family.areAttending)
-      .withInt(NUMBER_ATTENDING.toString, family.numberAttending)
+      .withString(EMAIL, family.email)
+      .withString(FIRST_NAME, family.firstName)
+      .withString(LAST_NAME, family.lastName)
+      .withBoolean(ARE_ATTENDING, family.areAttending)
+      .withInt(NUMBER_ATTENDING, family.numberAttending)
   }
 }

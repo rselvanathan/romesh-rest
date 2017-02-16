@@ -5,13 +5,9 @@ package dynamoDB.tableFields
   */
 object FamiliesFieldNames {
 
-  sealed abstract class FamilyFieldNames(value : String) {
-    override def toString = value
-  }
-
-  case object EMAIL extends FamilyFieldNames("email")
-  case object FIRST_NAME extends FamilyFieldNames("firstName")
-  case object LAST_NAME extends FamilyFieldNames("lastName")
-  case object ARE_ATTENDING extends FamilyFieldNames("areAttending")
-  case object NUMBER_ATTENDING extends FamilyFieldNames("numberAttending")
+  val EMAIL = "email"
+  val FIRST_NAME = "firstName"
+  val LAST_NAME = "lastName"
+  val ARE_ATTENDING = "areAttending"
+  val NUMBER_ATTENDING = "numberAttending"
 }
