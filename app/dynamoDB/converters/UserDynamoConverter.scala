@@ -1,7 +1,8 @@
-package dynamoDB
+package dynamoDB.converters
+
 import com.amazonaws.services.dynamodbv2.document.Item
 import domain.User
-import tableFields.UsersFieldNames._
+import dynamoDB.tableFields.UsersFieldNames.{PASSWORD, ROLE, USERNAME}
 
 /**
   * @author Romesh Selvan

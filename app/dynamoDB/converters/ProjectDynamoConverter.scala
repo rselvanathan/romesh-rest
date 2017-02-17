@@ -1,15 +1,15 @@
-package dynamoDB
+package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
 import domain.{GalleryLink, Project}
-import org.json4s.JsonAST.{JArray, JNull, JObject}
-import org.json4s.{DefaultFormats, JValue, NoTypeHints}
+import dynamoDB.tableFields.ProjectsFieldNames._
+import org.json4s.JsonAST.JArray
+import org.json4s.native.JsonParser._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
-import org.json4s.native.JsonParser._
+import org.json4s.{DefaultFormats, JValue, NoTypeHints}
 
-import collection.JavaConverters._
-import tableFields.ProjectsFieldNames._
+import scala.collection.JavaConverters._
 
 /**
   * @author Romesh Selvan

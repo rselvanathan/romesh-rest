@@ -1,13 +1,13 @@
-package dynamoDB
+package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
 import domain.{GalleryLink, Project}
 import org.json4s.NoTypeHints
 import org.json4s.native.Serialization
+import org.json4s.native.Serialization._
 import org.scalatestplus.play.PlaySpec
 
-import collection.JavaConverters._
-import org.json4s.native.Serialization._
+import scala.collection.JavaConverters._
 
 /**
   * @author Romesh Selvan

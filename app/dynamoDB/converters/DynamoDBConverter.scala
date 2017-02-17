@@ -1,4 +1,4 @@
-package dynamoDB
+package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
 

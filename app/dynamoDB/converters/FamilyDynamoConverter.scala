@@ -1,8 +1,8 @@
-package dynamoDB
+package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
 import domain.Family
-import tableFields.FamiliesFieldNames._
+import dynamoDB.tableFields.FamiliesFieldNames._
 
 /**
   * @author Romesh Selvan
