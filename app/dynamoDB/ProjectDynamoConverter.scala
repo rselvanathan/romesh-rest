@@ -15,11 +15,12 @@ import tableFields.ProjectsFieldNames._
   * @author Romesh Selvan
   */
 object ProjectDynamoConverter extends DynamoDBConverter{
+  type T = Project
 
   implicit val formats = Serialization.formats(NoTypeHints)
   implicit val extractFormats = DefaultFormats
 
-  def apply(project : Project) : Item = {
+  def apply(project : T) : Item = {
     new Item().withString(PROJECT_ID, project.projectId)
       .withString(PROJECT_TITLE, project.projectTitle)
       .withString(TITLE_IMAGE_LINK, project.titleImageLink)
@@ -31,7 +32,7 @@ object ProjectDynamoConverter extends DynamoDBConverter{
       .withInt(ORDER, project.order)
   }
 
-  def apply(item: Item) : Project = {
+  def apply(item: Item) : T = {
     Project(item.getString(PROJECT_ID),
       item.getString(PROJECT_TITLE),
       item.getString(TITLE_IMAGE_LINK),

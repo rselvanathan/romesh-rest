@@ -51,9 +51,9 @@ class ProjectDynamoConverterTest extends PlaySpec {
     }
   }
 
-  def defaultProject(galleryLinks : Seq[GalleryLink]) = Project(PROJECT_ID, PROJECT_TITLE, TITLE_IMAGE_LINK, BUTTON_TYPES, GITHUB_LINK, VIDEO_LINK, galleryLinks, DIRECT_LINK, ORDER)
+  private def defaultProject(galleryLinks : Seq[GalleryLink]) = Project(PROJECT_ID, PROJECT_TITLE, TITLE_IMAGE_LINK, BUTTON_TYPES, GITHUB_LINK, VIDEO_LINK, galleryLinks, DIRECT_LINK, ORDER)
 
-  def defaultItem(galleryLinks : String) = {
+  private def defaultItem(galleryLinks : String) = {
     if(galleryLinks != null) {
       new Item().withString("projectId", PROJECT_ID)
         .withString("projectTitle", PROJECT_TITLE)

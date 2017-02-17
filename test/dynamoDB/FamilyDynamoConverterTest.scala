@@ -31,9 +31,9 @@ class FamilyDynamoConverterTest extends PlaySpec {
     }
   }
 
-  def defaultFamily = Family(EMAIL, FIRST_NAME, LAST_NAME, ARE_ATTENDING, NUMBER_ATTENDING)
+  private def defaultFamily = Family(EMAIL, FIRST_NAME, LAST_NAME, ARE_ATTENDING, NUMBER_ATTENDING)
 
-  def defaultItem =
+  private def defaultItem =
     new Item().withString("email", EMAIL)
               .withString("firstName", FIRST_NAME)
               .withString("lastName", LAST_NAME)
