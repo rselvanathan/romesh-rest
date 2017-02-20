@@ -10,7 +10,7 @@ import com.google.inject.{AbstractModule, Inject, Provides, Singleton}
   */
 class DynamoDBModule extends AbstractModule {
   override def configure(): Unit = {
-    bind(classOf[AmazonCredProvider]).to(classOf[AmazonCredProvider])
+    bind(classOf[AmazonCredProvider])
   }
 
   @Provides() @Singleton()

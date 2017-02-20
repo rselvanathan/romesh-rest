@@ -16,7 +16,11 @@ import scala.collection.mutable.ListBuffer
 class UsersRepo @Inject() (dynamoDB : DynamoDB, @Named("User") dynamoDBConverter: DynamoDBConverter) extends Repo {
   override type T = User
 
-  override def findOne(id: String): T = dynamoDBConverter(getTable.getItem(UsersFieldNames.USERNAME, id)).asInstanceOf[T]
+  override def findOne(id: String): T = {
+    val item = getTable.getItem(UsersFieldNames.USERNAME, id)
+    if(item == null) null
+    else dynamoDBConverter(item).asInstanceOf[T]
+  }
 
   override def findAll(): Seq[T] = {
     val iterator = getTable.scan(new ScanSpec()).iterator()

@@ -22,8 +22,6 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   val ATTENDING = true
   val NUMBERATTENDING = 2
 
-  implicit val familyWriter = Json.writes[Family]
-
   val familiesRepo = stub[FamiliesRepo]
   val controller = new FamiliesController(familiesRepo)
 
@@ -45,6 +43,17 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
 
     statusCode should be (200)
     string should be (defaultFamilyJson)
+  }
+
+  test("Family Controller must return Bad request when family already exists when saving") {
+    (familiesRepo.findOne _).when(EMAIL).returns(defaultFamily)
+    val request = FakeRequest("POST","/families/add").withJsonBody(Json.parse(defaultFamilyJson))
+    val result: Future[Result] = controller.save().apply(request)
+    val statusCode = status(result)
+    val string = contentAsString(result)
+
+    statusCode should be (400)
+    string should be ("Family already exists")
   }
 
   test("Family Controller must save a valid family json") {
@@ -83,8 +92,18 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
     assertBadRequestJson(json)
   }
 
+  test("Family Controller must return Bad request when firstName is empty is provided when saving") {
+    val json = s"""{"email":"$EMAIL","firstName":"","lastName":"$LAST_NAME","areAttending":$ATTENDING,"numberAttending":$NUMBERATTENDING}"""
+    assertBadRequestJson(json)
+  }
+
   test("Family Controller must return Bad request when lastName is null is provided when saving") {
     val json = s"""{"email":"$EMAIL","firstName":"$FIRST_NAME","areAttending":$ATTENDING,"numberAttending":$NUMBERATTENDING}"""
+    assertBadRequestJson(json)
+  }
+
+  test("Family Controller must return Bad request when lastName is empty is provided when saving") {
+    val json = s"""{"email":"$EMAIL","firstName":"$FIRST_NAME","lastName":"","areAttending":$ATTENDING,"numberAttending":$NUMBERATTENDING}"""
     assertBadRequestJson(json)
   }
 
@@ -93,8 +112,18 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
     assertBadRequestJson(json)
   }
 
+  test("Family Controller must return Bad request when attending is wrong format is provided when saving") {
+    val json = s"""{"email":"$EMAIL","firstName":"$FIRST_NAME","lastName":"$LAST_NAME","areAttending":"true","numberAttending":$NUMBERATTENDING}"""
+    assertBadRequestJson(json)
+  }
+
   test("Family Controller must return Bad request when numberAttending is null is provided when saving") {
     val json = s"""{"email":"$EMAIL","firstName":"$FIRST_NAME","lastName":"$LAST_NAME","areAttending":$ATTENDING}"""
+    assertBadRequestJson(json)
+  }
+
+  test("Family Controller must return Bad request when numberAttending is wrong format is provided when saving") {
+    val json = s"""{"email":"$EMAIL","firstName":"$FIRST_NAME","lastName":"$LAST_NAME","areAttending":$ATTENDING,"numberAttending":"$NUMBERATTENDING"}"""
     assertBadRequestJson(json)
   }
 
