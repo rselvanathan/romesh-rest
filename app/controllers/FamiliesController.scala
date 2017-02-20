@@ -2,8 +2,9 @@ package controllers
 
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
+import controllers.util.JsonValidationWrapper
 import domain.Family
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import repositories.Repo
 
@@ -12,7 +13,8 @@ import repositories.Repo
   * @author Romesh Selvan
   */
 @Singleton
-class FamiliesController @Inject() (@Named("Family")repo: Repo) extends Controller {
+class FamiliesController @Inject() (@Named("Family")repo: Repo,
+                                    @Named("Family")jsonValidationWrapper : JsonValidationWrapper) extends Controller {
 
   def findFamily(email : String) = Action {
     val family : Family =  repo.findOne(email).asInstanceOf[Family]
@@ -24,20 +26,14 @@ class FamiliesController @Inject() (@Named("Family")repo: Repo) extends Controll
   }
 
   def save() = Action { implicit request =>
-    val json = request.body.asJson
-    if(json.get == null) BadRequest("No Json body found")
-    else {
-      json.get.validate[Family] match {
-        case success : JsSuccess[Family] =>
-          val familiy = repo.findOne(success.get.email)
-          if(familiy == null) {
-            val familySaved : Family = repo.save(success.get.asInstanceOf[repo.T]).asInstanceOf[Family]
-            Created(Json.toJson(familySaved))
-          } else {
-            BadRequest("Family already exists")
-          }
-        case JsError(error) => BadRequest("JSON Object is incorrect")
+    jsonValidationWrapper.apply[Family](request.body.asJson, success => {
+      val family = repo.findOne(success.email)
+      if(family == null) {
+        val familySaved : Family = repo.save(success.asInstanceOf[repo.T]).asInstanceOf[Family]
+        Created(Json.toJson(familySaved))
+      } else {
+        BadRequest("Family already exists")
       }
-    }
+    })
   }
 }

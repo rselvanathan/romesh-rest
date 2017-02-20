@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.util.FamilyValidationWrapper
 import domain.Family
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
@@ -23,7 +24,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   val NUMBERATTENDING = 2
 
   val familiesRepo = stub[FamiliesRepo]
-  val controller = new FamiliesController(familiesRepo)
+  val controller = new FamiliesController(familiesRepo, FamilyValidationWrapper)
 
   test("Family Controller must return a 'Not Found' response when email is not found") {
       (familiesRepo.findOne _).when(EMAIL).returns(null)
@@ -74,7 +75,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
     val string = contentAsString(result)
 
     statusCode should be (400)
-    string should be ("No Json body found")
+    string should be ("No Json body was found")
   }
 
   test("Family Controller must return Bad request when email is null is provided when saving") {

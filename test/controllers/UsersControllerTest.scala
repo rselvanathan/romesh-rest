@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.util.UserValidationWrapper
 import domain.{Login, User}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
@@ -21,7 +22,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   val ROLE = "ROLE_ADMIN"
 
   val repo = stub[UsersRepo]
-  val controller = new UsersController(repo)
+  val controller = new UsersController(repo, UserValidationWrapper)
 
   test("When passing in login information and the information is correct return a User object") {
     (repo.findOne _).when(USERNAME).returns(defaultUser)
