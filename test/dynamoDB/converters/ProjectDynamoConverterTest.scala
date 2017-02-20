@@ -5,6 +5,7 @@ import domain.{GalleryLink, Project}
 import org.json4s.NoTypeHints
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
+import org.scalatest.{FunSuite, Matchers}
 import org.scalatestplus.play.PlaySpec
 
 import scala.collection.JavaConverters._
@@ -12,7 +13,7 @@ import scala.collection.JavaConverters._
 /**
   * @author Romesh Selvan
   */
-class ProjectDynamoConverterTest extends PlaySpec {
+class ProjectDynamoConverterTest extends FunSuite with Matchers {
 
   implicit val formats = Serialization.formats(NoTypeHints)
 
@@ -28,28 +29,26 @@ class ProjectDynamoConverterTest extends PlaySpec {
   val DIRECT_LINK = "directLink"
   val ORDER = 1
 
-  "Converter" must {
-    "convert from Project object to DynamoDB Item object" in {
+  test("Converter must convert from Project object to DynamoDB Item object") {
       val project = defaultProject(galleryLinks)
       val expected = defaultItem(GALLERY_LINKS_STRING)
       val result = ProjectDynamoConverter(project)
-      result mustBe expected
+      result should be (expected)
     }
 
-    "convert from DynamDB object back to Project object" in {
+  test("Converter must convert from DynamDB object back to Project object") {
       val item = defaultItem(GALLERY_LINKS_STRING)
       val expected = defaultProject(galleryLinks)
       val result = ProjectDynamoConverter(item)
-      result mustBe expected
+      result should be (expected)
     }
 
-    "convert from DynamDB object with null Gallery Links back to Project object with null Gallery Links" in {
+  test("Converter must convert from DynamDB object with null Gallery Links back to Project object with null Gallery Links") {
       val item = defaultItem(null)
       val expected = defaultProject(null)
       val result = ProjectDynamoConverter(item)
-      result mustBe expected
+      result should be (expected)
     }
-  }
 
   private def defaultProject(galleryLinks : Seq[GalleryLink]) = Project(PROJECT_ID, PROJECT_TITLE, TITLE_IMAGE_LINK, BUTTON_TYPES, GITHUB_LINK, VIDEO_LINK, galleryLinks, DIRECT_LINK, ORDER)
 

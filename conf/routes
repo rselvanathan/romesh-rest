@@ -1,3 +1,4 @@
 # Routes For the Application
 
-GET     /       controllers.FamiliesController.index
+GET     /families/:email       controllers.FamiliesController.findFamily(email : String)
+POST    /families/add          controllers.FamiliesController.save

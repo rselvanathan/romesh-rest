@@ -2,12 +2,12 @@ package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
 import domain.Family
-import org.scalatestplus.play.PlaySpec
+import org.scalatest.{FunSuite, Matchers}
 
 /**
   * @author Romesh Selvan
   */
-class FamilyDynamoConverterTest extends PlaySpec {
+class FamilyDynamoConverterTest extends FunSuite with Matchers{
 
   val EMAIL = "email"
   val FIRST_NAME = "romesh"
@@ -15,21 +15,19 @@ class FamilyDynamoConverterTest extends PlaySpec {
   val ARE_ATTENDING = false
   val NUMBER_ATTENDING = 0
 
-  "Converter" must {
-    "convert from Family object to DynamoDB Item object" in {
+  test ("Converter must convert from Family object to DynamoDB Item object") {
       val family = defaultFamily
       val expected = defaultItem
       val result = FamilyDynamoConverter(family)
-      result mustBe expected
+      result should be (expected)
     }
 
-    "convert from DynamDB object back to Family object" in {
+   test("Coverter must convert from DynamDB object back to Family object") {
       val item = defaultItem
       val expected = defaultFamily
       val result = FamilyDynamoConverter(item)
-      result mustBe expected
+      result should be (expected)
     }
-  }
 
   private def defaultFamily = Family(EMAIL, FIRST_NAME, LAST_NAME, ARE_ATTENDING, NUMBER_ATTENDING)
 

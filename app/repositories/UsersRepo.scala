@@ -4,19 +4,19 @@ import com.amazonaws.services.dynamodbv2.document.{DynamoDB, Item}
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import domain.Family
+import domain.User
 import dynamoDB.converters.DynamoDBConverter
-import dynamoDB.tableFields.FamiliesFieldNames
+import dynamoDB.tableFields.UsersFieldNames
 
 import scala.collection.mutable.ListBuffer
 
 /**
   * @author Romesh Selvan
   */
-class FamiliesRepo @Inject() (dynamoDB : DynamoDB, @Named("Family") dynamoDBConverter: DynamoDBConverter) extends Repo {
-  override type T = Family
+class UsersRepo @Inject() (dynamoDB : DynamoDB, @Named("User") dynamoDBConverter: DynamoDBConverter) extends Repo {
+  override type T = User
 
-  override def findOne(id: String): T = dynamoDBConverter(getTable.getItem(FamiliesFieldNames.EMAIL, id)).asInstanceOf[T]
+  override def findOne(id: String): T = dynamoDBConverter(getTable.getItem(UsersFieldNames.USERNAME, id)).asInstanceOf[T]
 
   override def findAll(): Seq[T] = {
     val iterator = getTable.scan(new ScanSpec()).iterator()
@@ -27,11 +27,11 @@ class FamiliesRepo @Inject() (dynamoDB : DynamoDB, @Named("Family") dynamoDBConv
     mutableList.toList
   }
 
-  override def save(_object : T) : T = {
+  override def save(_object: T): T = {
     val item : Item = dynamoDBConverter.apply(_object.asInstanceOf[dynamoDBConverter.T])
     getTable.putItem(item)
     _object
   }
 
-  override def getTable = dynamoDB.getTable("romcharm-families")
+  override def getTable = dynamoDB.getTable("romcharm-userRoles")
 }
