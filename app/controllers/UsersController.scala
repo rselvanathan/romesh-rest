@@ -16,7 +16,8 @@ class UsersController @Inject() (@Named("User") repo : Repo,
                                  @Named("User")jsonWrapper : JsonValidationWrapper) extends Controller {
 
   def getUser = Action { implicit request =>
-    jsonWrapper[Login](request.body.asJson, login => {
+    implicit val json = request.body.asJson
+    jsonWrapper[Login](login => {
       val user = repo.findOne(login.username).asInstanceOf[User]
       if(user == null || user.password != login.password) NotFound("User/Password was not found or incorrect")
       else Ok(Json.toJson(user))

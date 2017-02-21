@@ -26,10 +26,11 @@ class FamiliesController @Inject() (@Named("Family")repo: Repo,
   }
 
   def save() = Action { implicit request =>
-    jsonValidationWrapper.apply[Family](request.body.asJson, success => {
-      val family = repo.findOne(success.email)
-      if(family == null) {
-        val familySaved : Family = repo.save(success.asInstanceOf[repo.T]).asInstanceOf[Family]
+    implicit val json = request.body.asJson
+    jsonValidationWrapper.apply[Family](family => {
+      val familyFound = repo.findOne(family.email)
+      if(familyFound == null) {
+        val familySaved : Family = repo.save(family.asInstanceOf[repo.T]).asInstanceOf[Family]
         Created(Json.toJson(familySaved))
       } else {
         BadRequest("Family already exists")
