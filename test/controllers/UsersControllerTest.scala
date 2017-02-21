@@ -57,6 +57,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   }
 
   test("When saving a user and the information is correct return a User object") {
+    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     (repo.save (_:User)(_:String)).when(defaultUser, tableName).returns(defaultUser)
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
     val future = controller.saveUser.apply(request)
@@ -65,6 +66,25 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
 
     statusCode should be (201)
     result should be (Json.parse(defaultUserJson))
+  }
+
+  test("When saving a user and the body is incorrect return a Bad Request") {
+    val request = FakeRequest().withJsonBody(Json.parse("{}"))
+    val future = controller.saveUser.apply(request)
+    val statusCode = status(future)
+
+    statusCode should be (400)
+  }
+
+  test("When saving a user and the user already exists then return a 400 error with User already exists message") {
+    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
+    val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
+    val future = controller.saveUser.apply(request)
+    val statusCode = status(future)
+    val result = contentAsString(future)
+
+    statusCode should be (400)
+    result should be ("User already exists.")
   }
 
   private def defaultLogin = Login(USERNAME, PASSWORD)

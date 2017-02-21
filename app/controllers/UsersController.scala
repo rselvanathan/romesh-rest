@@ -23,12 +23,16 @@ class UsersController @Inject() (repo : Repo[User],
     loginWrapper(login => {
       val user = repo.findOne(UsersFieldNames.USERNAME, login.username)
       if(user.isEmpty || user.get.password != login.password) NotFound("User/Password was not found or incorrect")
-      else Ok(Json.toJson(user.get))
+      else                                                    Ok(Json.toJson(user.get))
     })
   }
 
   def saveUser = Action { implicit request =>
-    val user = repo.save(request.body.asJson.get.as[User])
-    Created(Json.toJson(user))
+    implicit val jsn = request.body.asJson
+    userWrapper(user => {
+      val userFound = repo.findOne(UsersFieldNames.USERNAME, user.username)
+      if(userFound.isEmpty) Created(Json.toJson(repo.save(user)))
+      else                  BadRequest("User already exists.")
+    })
   }
 }
