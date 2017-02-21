@@ -14,13 +14,12 @@ import scala.collection.JavaConverters._
 /**
   * @author Romesh Selvan
   */
-object ProjectDynamoConverter extends DynamoDBConverter{
-  type T = Project
+object ProjectDynamoConverter extends DynamoDBConverter[Project]{
 
   implicit val formats = Serialization.formats(NoTypeHints)
   implicit val extractFormats = DefaultFormats
 
-  def apply(project : T) : Item = {
+  def apply(project : Project) : Item = {
     new Item().withString(PROJECT_ID, project.projectId)
       .withString(PROJECT_TITLE, project.projectTitle)
       .withString(TITLE_IMAGE_LINK, project.titleImageLink)
@@ -32,7 +31,7 @@ object ProjectDynamoConverter extends DynamoDBConverter{
       .withInt(ORDER, project.order)
   }
 
-  def apply(item: Item) : T = {
+  def apply(item: Item) : Project = {
     Project(item.getString(PROJECT_ID),
       item.getString(PROJECT_TITLE),
       item.getString(TITLE_IMAGE_LINK),

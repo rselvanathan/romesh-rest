@@ -3,7 +3,7 @@ package controllers
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import controllers.util.{FamilyValidationWrapper, JsonValidationWrapper, UserValidationWrapper}
-import repositories.{FamiliesRepo, Repo}
+import repositories.{FamiliesRepo, Repo, UsersRepo}
 
 /**
   * @author Romesh Selvan
@@ -11,6 +11,7 @@ import repositories.{FamiliesRepo, Repo}
 class ControllersModule extends AbstractModule{
   override def configure(): Unit = {
     bind(classOf[Repo]).annotatedWith(Names.named("Family")).to(classOf[FamiliesRepo])
+    bind(classOf[Repo]).annotatedWith(Names.named("User")).to(classOf[UsersRepo])
 
     bind(classOf[JsonValidationWrapper]).annotatedWith(Names.named("Family")).toInstance(FamilyValidationWrapper)
     bind(classOf[JsonValidationWrapper]).annotatedWith(Names.named("User")).toInstance(UserValidationWrapper)

@@ -7,10 +7,8 @@ import dynamoDB.tableFields.FamiliesFieldNames._
 /**
   * @author Romesh Selvan
   */
-object FamilyDynamoConverter extends DynamoDBConverter {
-  type T = Family
-
-  def apply(item : Item) : T = {
+object FamilyDynamoConverter extends DynamoDBConverter[Family] {
+  def apply(item : Item) : Family = {
     Family(item.getString(EMAIL),
       item.getString(FIRST_NAME),
       item.getString(LAST_NAME),
@@ -18,7 +16,8 @@ object FamilyDynamoConverter extends DynamoDBConverter {
       item.getInt(NUMBER_ATTENDING))
   }
 
-  def apply(family: T) : Item = {
+  def apply(_object: Family) : Item = {
+    val family = _object.asInstanceOf[Family]
     new Item()
       .withString(EMAIL, family.email)
       .withString(FIRST_NAME, family.firstName)

@@ -1,7 +1,7 @@
 package repositories
 
-import com.google.inject.AbstractModule
-import com.google.inject.name.Names
+import com.google.inject.{AbstractModule, TypeLiteral}
+import domain.{Family, User}
 import dynamoDB.converters.{DynamoDBConverter, FamilyDynamoConverter, UserDynamoConverter}
 
 /**
@@ -9,7 +9,7 @@ import dynamoDB.converters.{DynamoDBConverter, FamilyDynamoConverter, UserDynamo
   */
 class RepoModule extends AbstractModule{
   override def configure(): Unit = {
-    bind(classOf[DynamoDBConverter]).annotatedWith(Names.named("Family")).toInstance(FamilyDynamoConverter)
-    bind(classOf[DynamoDBConverter]).annotatedWith(Names.named("User")).toInstance(UserDynamoConverter)
+    bind(new TypeLiteral[DynamoDBConverter[Family]]{}).toInstance(FamilyDynamoConverter)
+    bind(new TypeLiteral[DynamoDBConverter[User]]{}).toInstance(UserDynamoConverter)
   }
 }
