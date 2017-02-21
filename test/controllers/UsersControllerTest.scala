@@ -1,6 +1,6 @@
 package controllers
 
-import controllers.util.UserValidationWrapper
+import controllers.util.{LoginValidationWrapper, UserValidationWrapper}
 import domain.{Login, User}
 import dynamoDB.tableFields.UsersFieldNames
 import org.scalamock.scalatest.MockFactory
@@ -21,7 +21,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
 
   val tableName = "romcharm-userRoles"
   val repo = stub[UsersRepo]
-  val controller = new UsersController(repo, UserValidationWrapper)
+  val controller = new UsersController(repo, LoginValidationWrapper, UserValidationWrapper)
 
   test("When passing in login information and the information is correct return a User object") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))

@@ -1,6 +1,5 @@
 package controllers
 
-import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import controllers.util.JsonValidationWrapper
 import domain.{Login, User}
@@ -14,13 +13,14 @@ import repositories.Repo
   */
 @Singleton
 class UsersController @Inject() (repo : Repo[User],
-                                 @Named("User")jsonWrapper : JsonValidationWrapper) extends Controller {
+                                 loginWrapper : JsonValidationWrapper[Login],
+                                 userWrapper : JsonValidationWrapper[User]) extends Controller {
 
   implicit val tableName = "romcharm-userRoles"
 
   def getUser = Action { implicit request =>
     implicit val json = request.body.asJson
-    jsonWrapper[Login](login => {
+    loginWrapper(login => {
       val user = repo.findOne(UsersFieldNames.USERNAME, login.username)
       if(user.isEmpty || user.get.password != login.password) NotFound("User/Password was not found or incorrect")
       else Ok(Json.toJson(user.get))

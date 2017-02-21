@@ -1,9 +1,8 @@
 package controllers
 
 import com.google.inject.{AbstractModule, Scopes, TypeLiteral}
-import com.google.inject.name.Names
-import controllers.util.{FamilyValidationWrapper, JsonValidationWrapper, UserValidationWrapper}
-import domain.{Family, User}
+import controllers.util.{FamilyValidationWrapper, JsonValidationWrapper, LoginValidationWrapper, UserValidationWrapper}
+import domain.{Family, Login, User}
 import repositories._
 
 /**
@@ -14,7 +13,8 @@ class ControllersModule extends AbstractModule{
     bind(new TypeLiteral[Repo[Family]] {}).to(classOf[FamiliesRepo]).in(Scopes.SINGLETON)
     bind(new TypeLiteral[Repo[User]] {}).to(classOf[UsersRepo]).in(Scopes.SINGLETON)
 
-    bind(classOf[JsonValidationWrapper]).annotatedWith(Names.named("Family")).toInstance(FamilyValidationWrapper)
-    bind(classOf[JsonValidationWrapper]).annotatedWith(Names.named("User")).toInstance(UserValidationWrapper)
+    bind(new TypeLiteral[JsonValidationWrapper[Family]]{}).toInstance(FamilyValidationWrapper)
+    bind(new TypeLiteral[JsonValidationWrapper[Login]]{}).toInstance(LoginValidationWrapper)
+    bind(new TypeLiteral[JsonValidationWrapper[User]]{}).toInstance(UserValidationWrapper)
   }
 }
