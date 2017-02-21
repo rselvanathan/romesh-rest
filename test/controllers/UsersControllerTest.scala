@@ -5,12 +5,9 @@ import domain.{Login, User}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.json.Json
-import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import repositories.UsersRepo
-
-import scala.concurrent.Future
 
 /**
   * @author Romesh Selvan
@@ -67,26 +64,6 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
     result should be ("No Json body was found")
   }
 
-  test("When passing in a wrong json Body expect BadRequest") {
-    assertBadRequestJson("{}")
-  }
-
-  test("When passing in a login with null username expect BadRequest") {
-    assertBadRequestJson(s"""{"password":"$PASSWORD"}""")
-  }
-
-  test("When passing in a login with empty username expect BadRequest") {
-    assertBadRequestJson(s"""{"username":"","password":"$PASSWORD"}""")
-  }
-
-  test("When passing in a login with null password expect BadRequest") {
-    assertBadRequestJson(s"""{"username":"$USERNAME"}""")
-  }
-
-  test("When passing in a login with empty password expect BadRequest") {
-    assertBadRequestJson(s"""{"username":"$USERNAME","password":""}""")
-  }
-
   test("When saving a user and the information is correct return a User object") {
     (repo.save _).when(defaultUser).returns(defaultUser)
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
@@ -102,14 +79,4 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   private def defaultUser = User(USERNAME, PASSWORD, ROLE)
   private def defaultLoginJson = s"""{"username":"$USERNAME","password":"$PASSWORD"}"""
   private def defaultUserJson = s"""{"username":"$USERNAME","password":"$PASSWORD","role":"$ROLE"}"""
-
-  def assertBadRequestJson(json : String) = {
-    val request = FakeRequest("POST","/auth").withJsonBody(Json.parse(json))
-    val result: Future[Result] = controller.getUser().apply(request)
-    val statusCode = status(result)
-    val string = contentAsString(result)
-
-    statusCode should be (400)
-    string should be ("JSON Object is incorrect")
-  }
 }

@@ -11,8 +11,8 @@ import play.api.mvc.{ResponseHeader, Result}
 trait JsonValidationWrapper {
 
   /**
-    * Will take a JsValue and a function as a parameter. The function should process the JSON that will be passed into it
-    * and return back a `Result`.
+    * Will take a JsValue and a function as a parameter. The function should process the JSON Object once the validation
+    * succeeds. Otherwise a default Bad Request will be returned
     * @param jsValue - the jsValue to validate
     * @param successFunction - the function to apply to the validated jsValue
     * @tparam T - Domain type of the json value
