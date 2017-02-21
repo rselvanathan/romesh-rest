@@ -13,12 +13,14 @@ import repositories.Repo
   * @author Romesh Selvan
   */
 @Singleton
-class FamiliesController @Inject() (@Named("Family")repo: Repo,
-                                    @Named("Family")jsonValidationWrapper : JsonValidationWrapper) extends Controller {
+class FamiliesController @Inject() ( repo : Repo[Family],
+                                     @Named("Family")jsonValidationWrapper : JsonValidationWrapper) extends Controller {
+
+  implicit val tableName = "romcharm-families"
 
   def findFamily(email : String) = Action {
-    val family : Family =  repo.findOne(email).asInstanceOf[Family]
-    if(family == null) {
+    val family : Option[Family] =  repo.findOne("email", email)
+    if(family.isEmpty) {
       NotFound("Email was not found")
     } else {
       Ok(Json.toJson(family))
@@ -28,9 +30,9 @@ class FamiliesController @Inject() (@Named("Family")repo: Repo,
   def save() = Action { implicit request =>
     implicit val json = request.body.asJson
     jsonValidationWrapper.apply[Family](family => {
-      val familyFound = repo.findOne(family.email)
-      if(familyFound == null) {
-        val familySaved : Family = repo.save(family.asInstanceOf[repo.T]).asInstanceOf[Family]
+      val familyFound = repo.findOne("email", family.email)
+      if(familyFound.isEmpty) {
+        val familySaved : Family = repo.save(family)
         Created(Json.toJson(familySaved))
       } else {
         BadRequest("Family already exists")

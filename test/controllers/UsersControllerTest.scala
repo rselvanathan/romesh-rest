@@ -2,6 +2,7 @@ package controllers
 
 import controllers.util.UserValidationWrapper
 import domain.{Login, User}
+import dynamoDB.tableFields.UsersFieldNames
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.json.Json
@@ -18,11 +19,12 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   val PASSWORD = "password"
   val ROLE = "ROLE_ADMIN"
 
+  val tableName = "romcharm-userRoles"
   val repo = stub[UsersRepo]
   val controller = new UsersController(repo, UserValidationWrapper)
 
   test("When passing in login information and the information is correct return a User object") {
-    (repo.findOne _).when(USERNAME).returns(defaultUser)
+    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.getUser.apply(request)
     val statusCode = status(future)
@@ -33,7 +35,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   }
 
   test("When passing in login information and the information and user is not found return NotFound") {
-    (repo.findOne _).when(USERNAME).returns(null)
+    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.getUser.apply(request)
     val statusCode = status(future)
@@ -44,7 +46,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   }
 
   test("When passing in login information and the password is incorrect return NotFound") {
-    (repo.findOne _).when(USERNAME).returns(User(USERNAME, "newPass", ROLE))
+    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(User(USERNAME, "newPass", ROLE)))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.getUser.apply(request)
     val statusCode = status(future)
@@ -54,18 +56,8 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
     result should be ("User/Password was not found or incorrect")
   }
 
-  test("When passing in a no json Body expect BadRequest") {
-    val request = FakeRequest().withJsonBody(null)
-    val future = controller.getUser.apply(request)
-    val statusCode = status(future)
-    val result = contentAsString(future)
-
-    statusCode should be (400)
-    result should be ("No Json body was found")
-  }
-
   test("When saving a user and the information is correct return a User object") {
-    (repo.save _).when(defaultUser).returns(defaultUser)
+    (repo.save (_:User)(_:String)).when(defaultUser, tableName).returns(defaultUser)
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
     val future = controller.saveUser.apply(request)
     val statusCode = status(future)
