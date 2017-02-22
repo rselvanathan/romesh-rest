@@ -1,5 +1,6 @@
-package jwt
+package security
 
+import defaults.SystemValues
 import domain.User
 import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
 
@@ -10,8 +11,8 @@ import scala.collection.JavaConverters._
   */
 class JWTUtil {
 
-  val CLAIM_ROLE = "role"
-  val CLAIM_USERNAME = "username"
+  private val CLAIM_ROLE = "role"
+  private val CLAIM_USERNAME = "username"
 
   def getTokenUser(implicit token : String) = getTokenField(CLAIM_USERNAME)
 
@@ -20,7 +21,7 @@ class JWTUtil {
   def generateToken(user: User) = generateTokenWithClaims(Map(CLAIM_USERNAME -> user.username, CLAIM_ROLE -> user.role))
 
   private def generateTokenWithClaims(map : Map[String, AnyRef]) =
-    Jwts.builder().setClaims(map.asJava).signWith(SignatureAlgorithm.HS512, "").compact()
+    Jwts.builder().setClaims(map.asJava).signWith(SignatureAlgorithm.HS512, SystemValues.JWTSECRET).compact()
 
   private def getTokenField(field : String)(implicit token : String) = {
     val claimsFromToken = getClaimsFromToken
@@ -30,7 +31,7 @@ class JWTUtil {
 
   private def getClaimsFromToken(implicit token : String) = {
     try {
-      Some(Jwts.parser().setSigningKey("").parseClaimsJws(token).getBody)
+      Some(Jwts.parser().setSigningKey(SystemValues.JWTSECRET).parseClaimsJws(token).getBody)
     } catch {
       case e : Exception => None
     }
