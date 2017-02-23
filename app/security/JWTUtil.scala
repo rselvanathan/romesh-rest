@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 /**
   * @author Romesh Selvan
   */
-class JWTUtil {
+object JWTUtil {
 
   private val CLAIM_ROLE = "role"
   private val CLAIM_USERNAME = "username"

@@ -1,8 +1,7 @@
-package jwt
+package security
 
 import domain.User
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
-import security.JWTUtil
 
 /**
   * @author Romesh Selvan
@@ -13,8 +12,6 @@ class JWTUtilTest extends FunSuite with Matchers with BeforeAndAfterAll {
   val PASSWORD = "password"
   val ROLE = "ADMIN"
 
-  val jwtUtil = new JWTUtil
-
   override def beforeAll() = {
     sys.props.put("JWTSECRET", "secret")
     sys.props.put("AWS_ACCESS_KEY_ID", "access")
@@ -22,29 +19,29 @@ class JWTUtilTest extends FunSuite with Matchers with BeforeAndAfterAll {
   }
 
   test("Token generated should be a non empty token") {
-    val token = jwtUtil.generateToken(defaultUser)
+    val token = JWTUtil.generateToken(defaultUser)
     token should not be null
   }
 
   test("When retrieving a role from the token, the correct role should be returned") {
-    val token = jwtUtil.generateToken(defaultUser)
-    val role = jwtUtil.getTokenRole(token)
+    val token = JWTUtil.generateToken(defaultUser)
+    val role = JWTUtil.getTokenRole(token)
     role.get should be (ROLE)
   }
 
   test("When retrieving a username from the token, the correct username should be returned") {
-    val token = jwtUtil.generateToken(defaultUser)
-    val username = jwtUtil.getTokenUser(token)
+    val token = JWTUtil.generateToken(defaultUser)
+    val username = JWTUtil.getTokenUser(token)
     username.get should be (USERNAME)
   }
 
   test("When retrieving a username and token is bad then expect a None") {
-    val username = jwtUtil.getTokenUser("bad")
+    val username = JWTUtil.getTokenUser("bad")
     username should be (None)
   }
 
   test("When retrieving a role and token is bad then expect a None") {
-    val username = jwtUtil.getTokenRole("bad")
+    val username = JWTUtil.getTokenRole("bad")
     username should be (None)
   }
 

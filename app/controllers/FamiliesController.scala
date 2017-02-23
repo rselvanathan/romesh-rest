@@ -1,11 +1,13 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
+import controllers.actions.AuthFilter
 import controllers.util.JsonValidationWrapper
+import defaults.ApiMethods._
 import domain.Family
 import dynamoDB.tableFields.FamiliesFieldNames
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
 import repositories.Repo
 
 
@@ -18,7 +20,7 @@ class FamiliesController @Inject() ( repo : Repo[Family],
 
   implicit val tableName = "romcharm-families"
 
-  def findFamily(email : String) = Action {
+  def findFamily(email : String) = (AuthFilter andThen AuthFilter.checkPermission(GET_FAMILY)) {
     val family : Option[Family] =  repo.findOne(FamiliesFieldNames.EMAIL, email)
     if(family.isEmpty) {
       NotFound("Email was not found")
@@ -27,7 +29,7 @@ class FamiliesController @Inject() ( repo : Repo[Family],
     }
   }
 
-  def save() = Action { implicit request =>
+  def save() = (AuthFilter andThen AuthFilter.checkPermission(SAVE_FAMILY)) { implicit request =>
     implicit val json = request.body.asJson
     jsonValidationWrapper.apply(family => {
       val familyFound = repo.findOne(FamiliesFieldNames.EMAIL, family.email)

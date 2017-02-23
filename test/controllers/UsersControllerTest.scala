@@ -23,21 +23,20 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   val repo = stub[UsersRepo]
   val controller = new UsersController(repo, LoginValidationWrapper, UserValidationWrapper)
 
-  test("When passing in login information and the information is correct return a User object") {
+  test("When passing in login information and the information is correct return a Token") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
-    val future = controller.getUser.apply(request)
+    val future = controller.authenticate.apply(request)
     val statusCode = status(future)
     val result = contentAsJson(future)
 
     statusCode should be (200)
-    result should be (Json.parse(defaultUserJson))
   }
 
   test("When passing in login information and the information and user is not found return NotFound") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
-    val future = controller.getUser.apply(request)
+    val future = controller.authenticate.apply(request)
     val statusCode = status(future)
     val result = contentAsString(future)
 
@@ -48,7 +47,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   test("When passing in login information and the password is incorrect return NotFound") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(User(USERNAME, "newPass", ROLE)))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
-    val future = controller.getUser.apply(request)
+    val future = controller.authenticate.apply(request)
     val statusCode = status(future)
     val result = contentAsString(future)
 
