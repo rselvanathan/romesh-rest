@@ -1,7 +1,7 @@
 package controllers
 
 import com.google.inject.{Inject, Singleton}
-import controllers.actions.AuthFilter
+import controllers.actions.AuthAction
 import controllers.util.JsonValidationWrapper
 import defaults.ApiMethods._
 import domain.{Login, Token, User}
@@ -30,7 +30,7 @@ class UsersController @Inject() (repo : Repo[User],
     })
   }
 
-  def saveUser = (AuthFilter andThen AuthFilter.checkPermission(SAVE_USER)) { implicit request =>
+  def saveUser = (AuthAction andThen AuthAction.checkPermission(SAVE_USER)) { implicit request =>
     implicit val jsn = request.body.asJson
     userWrapper(user => {
       val userFound = repo.findOne(UsersFieldNames.USERNAME, user.username)

@@ -1,19 +1,21 @@
 package controllers
 
 import controllers.util.{LoginValidationWrapper, UserValidationWrapper}
+import defaults.Role
 import domain.{Login, User}
 import dynamoDB.tableFields.UsersFieldNames
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{FunSuite, Matchers}
-import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
+import play.api.libs.json.{JsValue, Json}
+import play.api.test.{FakeHeaders, FakeRequest}
 import play.api.test.Helpers.{contentAsString, _}
 import repositories.UsersRepo
+import security.JWTUtil
 
 /**
   * @author Romesh Selvan
   */
-class UsersControllerTest extends FunSuite with Matchers with MockFactory{
+class UsersControllerTest extends FunSuite with Matchers with MockFactory with BeforeAndAfterAll {
 
   val USERNAME = "romesh"
   val PASSWORD = "password"
@@ -22,6 +24,12 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   val tableName = "romcharm-userRoles"
   val repo = stub[UsersRepo]
   val controller = new UsersController(repo, LoginValidationWrapper, UserValidationWrapper)
+
+  override def beforeAll = {
+    sys.props.put("JWTSECRET", "secret")
+    sys.props.put("AWS_ACCESS_KEY_ID", "access")
+    sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
+  }
 
   test("When passing in login information and the information is correct return a Token") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
@@ -58,8 +66,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   test("When saving a user and the information is correct return a User object") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     (repo.save (_:User)(_:String)).when(defaultUser, tableName).returns(defaultUser)
-    val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
-    val future = controller.saveUser.apply(request)
+    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)
     val result = contentAsJson(future)
 
@@ -68,8 +75,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   }
 
   test("When saving a user and the body is incorrect return a Bad Request") {
-    val request = FakeRequest().withJsonBody(Json.parse("{}"))
-    val future = controller.saveUser.apply(request)
+    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse("{}")))
     val statusCode = status(future)
 
     statusCode should be (400)
@@ -78,12 +84,28 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory{
   test("When saving a user and the user already exists then return a 400 error with User already exists message") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
-    val future = controller.saveUser.apply(request)
+    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)
     val result = contentAsString(future)
 
     statusCode should be (400)
     result should be ("User already exists.")
+  }
+
+  test("Only allow saving user as ADMIN") {
+    val future = controller.saveUser.apply(getRequest(Role.MYPAGE_APP, Json.parse("{}")))
+    val statusCode = status(future)
+
+    val futureTwo = controller.saveUser.apply(getRequest(Role.ROMCHARM_APP, Json.parse("{}")))
+    val statusCodeTwo = status(futureTwo)
+
+    statusCodeTwo should be (401)
+    statusCode should be (401)
+  }
+
+  def getRequest(role : String, jsValue : JsValue) = {
+    val token = JWTUtil.generateToken(User("romesh", "password", role))
+    FakeRequest("GET", "/users/add", FakeHeaders(List("Authorization" -> token).asInstanceOf[Seq[(String, String)]]), null).withJsonBody(jsValue)
   }
 
   private def defaultLogin = Login(USERNAME, PASSWORD)

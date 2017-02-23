@@ -10,7 +10,7 @@ import scala.concurrent.Future
 /**
   * @author Romesh Selvan
   */
-object AuthFilter extends ActionBuilder[UserRequest] with ActionRefiner[Request, UserRequest]{
+object AuthAction extends ActionBuilder[UserRequest] with ActionRefiner[Request, UserRequest]{
 
   def checkPermission(methodName : String) = new ActionRefiner[UserRequest, UserRequest] {
     override protected def refine[A](request: UserRequest[A]): Future[Either[Result, UserRequest[A]]] = Future.successful {
