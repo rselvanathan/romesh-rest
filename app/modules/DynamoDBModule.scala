@@ -1,9 +1,10 @@
-package dynamoDB
+package modules
 
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.google.inject.{AbstractModule, Inject, Provides, Singleton}
+import dynamoDB.AmazonCredProvider
 
 /**
   * @author Romesh Selvan

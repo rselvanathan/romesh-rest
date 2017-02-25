@@ -1,7 +1,5 @@
 package repositories
 
-import java.util.function.Consumer
-
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec
 import com.amazonaws.services.dynamodbv2.document.{DynamoDB, Item}
 import defaults.TableNames
@@ -31,7 +29,8 @@ abstract class RepoImpl[T] (dynamoDB : DynamoDB, dynamoDBConverter: DynamoDBConv
 
   override def findAll(implicit tableName: TableName): Seq[T] = {
     val mutableList : ListBuffer[T] = ListBuffer()
-    dynamoDB.getTable(TableNames.getTableName(tableName)).scan(new ScanSpec()).forEach(collectObjects(mutableList))
+    val iterator = dynamoDB.getTable(TableNames.getTableName(tableName)).scan(new ScanSpec()).iterator()
+    while(iterator.hasNext) mutableList.+=(dynamoDBConverter(iterator.next()))
     mutableList.toList
   }
 
@@ -39,11 +38,5 @@ abstract class RepoImpl[T] (dynamoDB : DynamoDB, dynamoDBConverter: DynamoDBConv
     val item : Item = dynamoDBConverter.apply(_object)
     dynamoDB.getTable(TableNames.getTableName(tableName)).putItem(item)
     _object
-  }
-
-  private def collectObjects(mutableList : ListBuffer[T]) : Consumer[_ >: Item] = new Consumer[Item] {
-    override def accept(item: Item) = {
-      mutableList.+=(dynamoDBConverter(item))
-    }
   }
 }

@@ -8,6 +8,7 @@ import domain.{GalleryLink, Project, User}
 import dynamoDB.tableFields.ProjectsFieldNames
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
+import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeHeaders, FakeRequest}
 import repositories.ProjectRepo
@@ -95,6 +96,42 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
     val statusCode = status(result)
 
     statusCode should be (403)
+  }
+
+  test("A valid save Project request should return the project object") {
+    (repo.save (_:Project)(_:TableName)).when(defaultProjecct, tableName).returns(defaultProjecct)
+
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ADMIN)))
+    val request = FakeRequest("POST", "/", FakeHeaders(List("Authorization" -> token).asInstanceOf[Seq[(String, String)]]), null)
+                  .withJsonBody(Json.toJson(defaultProjecct))
+
+    val result : Future[Result] = controller.save.apply(request)
+    val statusCode = status(result)
+    val json = contentAsJson(result)
+
+    statusCode should be (201)
+    json.toString() should be (expectedJson)
+  }
+
+  test("Save Project should only be allowed for Admin") {
+    (repo.save (_:Project)(_:TableName)).when(defaultProjecct, tableName).returns(defaultProjecct)
+
+    val tokenMyPage = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.MYPAGE_APP)))
+    val tokenROMCHARM = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ROMCHARM_APP)))
+
+    val requestMyPage = FakeRequest("POST", "/", FakeHeaders(List("Authorization" -> tokenMyPage).asInstanceOf[Seq[(String, String)]]), null)
+      .withJsonBody(Json.toJson(defaultProjecct))
+    val requestROMCHARM = FakeRequest("POST", "/", FakeHeaders(List("Authorization" -> tokenMyPage).asInstanceOf[Seq[(String, String)]]), null)
+      .withJsonBody(Json.toJson(defaultProjecct))
+
+    val resultMyPage : Future[Result] = controller.save.apply(requestMyPage)
+    val statusMyPage = status(resultMyPage)
+
+    val resultROMCHARM : Future[Result] = controller.save.apply(requestMyPage)
+    val statusROMCHARM = status(resultROMCHARM)
+
+    statusMyPage should be (403)
+    statusROMCHARM should be (403)
   }
 
   def getRequest(role : Role) = {

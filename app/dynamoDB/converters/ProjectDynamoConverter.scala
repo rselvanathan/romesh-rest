@@ -22,15 +22,16 @@ object ProjectDynamoConverter extends DynamoDBConverter[Project]{
   implicit val extractFormats = DefaultFormats
 
   def apply(project : Project) : Item = {
-    new Item().withString(PROJECT_ID, project.projectId)
+    var item = new Item().withString(PROJECT_ID, project.projectId)
       .withString(PROJECT_TITLE, project.projectTitle)
-      .withString(TITLE_IMAGE_LINK, project.titleImageLink.get)
-      .withList(BUTTON_TYPES, project.buttonTypes.getOrElse(List()).map(ButtonTypes.buttonTypeToString).asJava)
-      .withString(GITHUB_LINK, project.githubLink.get)
-      .withString(VIDEO_LINK, project.videoLink.get)
-      .withString(GALLERY_LINKS, write(project.galleryLinks))
-      .withString(DIRECT_LINK, project.directLink.get)
       .withInt(ORDER, project.order.get)
+    if(project.galleryLinks.isDefined) item = item.withString(GALLERY_LINKS, write(project.galleryLinks))
+    if(project.buttonTypes.isDefined) item = item.withList(BUTTON_TYPES, project.buttonTypes.get.map(ButtonTypes.buttonTypeToString).asJava)
+    if(project.titleImageLink.isDefined) item = item.withString(TITLE_IMAGE_LINK, project.titleImageLink.get)
+    if(project.githubLink.isDefined) item = item.withString(GITHUB_LINK, project.githubLink.get)
+    if(project.videoLink.isDefined) item = item.withString(VIDEO_LINK, project.videoLink.get)
+    if(project.directLink.isDefined) item = item.withString(DIRECT_LINK, project.directLink.get)
+    item
   }
 
   def apply(item: Item) : Project = {

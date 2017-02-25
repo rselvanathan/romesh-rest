@@ -11,3 +11,4 @@ POST    /users/add              controllers.UsersController.saveUser
 # /projects endpoints
 GET     /projects/:projectId    controllers.ProjectController.getProject(projectId : String)
 GET     /projects               controllers.ProjectController.getAllProjects
+POST    /projects/save          controllers.ProjectController.save

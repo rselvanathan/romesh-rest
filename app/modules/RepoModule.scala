@@ -1,4 +1,4 @@
-package repositories
+package modules
 
 import com.google.inject.{AbstractModule, TypeLiteral}
 import domain.{Family, Project, User}

@@ -1,4 +1,4 @@
-package controllers
+package modules
 
 import com.google.inject.{AbstractModule, Scopes, TypeLiteral}
 import controllers.util._

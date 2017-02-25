@@ -30,4 +30,9 @@ class ProjectController @Inject() (repo : Repo[Project],
     val projects = repo.findAll
     Ok(Json.toJson(projects))
   }
+
+  def save = (AuthAction andThen AuthAction.checkPermission(SAVE_PROJECT)) { implicit request =>
+    implicit val optionJson = request.body.asJson
+    jsonValidator(project => Created(Json.toJson(repo.save(project))))
+  }
 }
