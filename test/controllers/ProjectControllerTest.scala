@@ -40,7 +40,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
     sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
   }
 
-  test("Family Controller must return a 404 response when email is not found") {
+  test("Project Controller must return a 404 response when email is not found") {
     (repo.findOne (_:String, _:String)(_:String)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(None)
     val result: Future[Result] = controller.getProject(PROJECT_ID).apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
@@ -50,7 +50,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
     content should be ("Project not found")
   }
 
-  test("Family Controller must return a Success response when email is found with correct json") {
+  test("Project Controller must return a Success response when email is found with correct json") {
     (repo.findOne (_:String, _:String)(_:String)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(Some(defaultProjecct))
     val result: Future[Result] = controller.getProject(PROJECT_ID).apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
@@ -62,6 +62,35 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
 
   test("Only MyPage User and Admin user are allowed to the Use the Get API") {
     val result: Future[Result] = controller.getProject(PROJECT_ID).apply(getRequest(Roles.ROMCHARM_APP))
+    val statusCode = status(result)
+
+    statusCode should be (403)
+  }
+
+  test("Project Controller must return all projects when the projects are present in the DB") {
+    (repo.findAll (_:String)).when(tableName).returns(List(defaultProjecct, defaultProjecct))
+    val result: Future[Result] = controller.getAllProjects.apply(getRequest(Roles.MYPAGE_APP))
+    val statusCode = status(result)
+    val json = contentAsJson(result)
+    val jsonList = s"""[$expectedJson,$expectedJson]"""
+
+    statusCode should be (200)
+    json.toString() should be (jsonList)
+  }
+
+  test("Project Controller must return empty project list when no projects are present in the DB") {
+    (repo.findAll (_:String)).when(tableName).returns(List())
+    val result: Future[Result] = controller.getAllProjects.apply(getRequest(Roles.MYPAGE_APP))
+    val statusCode = status(result)
+    val json = contentAsJson(result)
+    val jsonList = s"""[]"""
+
+    statusCode should be (200)
+    json.toString() should be (jsonList)
+  }
+
+  test("Only MyPage User and Admin user are allowed to the Use the Get All Projects API") {
+    val result: Future[Result] = controller.getAllProjects.apply(getRequest(Roles.ROMCHARM_APP))
     val statusCode = status(result)
 
     statusCode should be (403)
