@@ -1,8 +1,9 @@
 package controllers
 
 import controllers.util.ProjectValidationWrapper
-import defaults.{ButtonTypes, Roles}
+import defaults.{ButtonTypes, Roles, TableNames}
 import defaults.Roles.Role
+import defaults.TableNames.TableName
 import domain.{GalleryLink, Project, User}
 import dynamoDB.tableFields.ProjectsFieldNames
 import org.scalamock.scalatest.MockFactory
@@ -30,7 +31,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
   val DIRECT_LINK = "link"
   val ORDER = 2
 
-  val tableName = "mypage-projects"
+  val tableName = TableNames.MYPAGE_PROJECTS
   val repo = stub[ProjectRepo]
   val controller = new ProjectController(repo, ProjectValidationWrapper)
 
@@ -41,7 +42,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
   }
 
   test("Project Controller must return a 404 response when email is not found") {
-    (repo.findOne (_:String, _:String)(_:String)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(None)
+    (repo.findOne (_:String, _:String)(_:TableName)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(None)
     val result: Future[Result] = controller.getProject(PROJECT_ID).apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
     val content = contentAsString(result)
@@ -51,7 +52,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
   }
 
   test("Project Controller must return a Success response when email is found with correct json") {
-    (repo.findOne (_:String, _:String)(_:String)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(Some(defaultProjecct))
+    (repo.findOne (_:String, _:String)(_:TableName)).when(ProjectsFieldNames.PROJECT_ID, PROJECT_ID, tableName).returns(Some(defaultProjecct))
     val result: Future[Result] = controller.getProject(PROJECT_ID).apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
     val json = contentAsJson(result)
@@ -68,7 +69,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
   }
 
   test("Project Controller must return all projects when the projects are present in the DB") {
-    (repo.findAll (_:String)).when(tableName).returns(List(defaultProjecct, defaultProjecct))
+    (repo.findAll (_:TableName)).when(tableName).returns(List(defaultProjecct, defaultProjecct))
     val result: Future[Result] = controller.getAllProjects.apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
     val json = contentAsJson(result)
@@ -79,7 +80,7 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
   }
 
   test("Project Controller must return empty project list when no projects are present in the DB") {
-    (repo.findAll (_:String)).when(tableName).returns(List())
+    (repo.findAll (_:TableName)).when(tableName).returns(List())
     val result: Future[Result] = controller.getAllProjects.apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
     val json = contentAsJson(result)

@@ -4,6 +4,7 @@ import com.google.inject.{Inject, Singleton}
 import controllers.actions.AuthAction
 import controllers.util.JsonValidationWrapper
 import defaults.ApiMethods._
+import defaults.TableNames
 import domain.{Login, Token, User}
 import dynamoDB.tableFields.UsersFieldNames
 import play.api.libs.json.Json
@@ -19,7 +20,7 @@ class UsersController @Inject() (repo : Repo[User],
                                  loginWrapper : JsonValidationWrapper[Login],
                                  userWrapper : JsonValidationWrapper[User]) extends Controller {
 
-  implicit val tableName = "romcharm-userRoles"
+  implicit val tableName = TableNames.USER_ROLES
 
   def authenticate = Action { implicit request =>
     implicit val json = request.body.asJson

@@ -1,8 +1,9 @@
 package controllers
 
 import controllers.util.FamilyValidationWrapper
-import defaults.Roles
+import defaults.{Roles, TableNames}
 import defaults.Roles.Role
+import defaults.TableNames.TableName
 import domain.{Family, User}
 import dynamoDB.tableFields.FamiliesFieldNames
 import org.scalamock.scalatest.MockFactory
@@ -27,7 +28,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   val ATTENDING = true
   val NUMBERATTENDING = 2
 
-  val tableName = "romcharm-families"
+  val tableName = TableNames.ROMCHARM_FAMILY
   val familiesRepo = stub[FamiliesRepo]
   val controller = new FamiliesController(familiesRepo,FamilyValidationWrapper)
 
@@ -38,7 +39,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("Family Controller must return a 'Not Found' response when email is not found") {
-      (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
+      (familiesRepo.findOne (_:String, _:String)(_:TableName)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
       val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Roles.ROMCHARM_APP))
       val statusCode = status(result)
       val string = contentAsString(result)
@@ -48,7 +49,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("Family Controller must return a Success response when email is found with correct json") {
-    (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
+    (familiesRepo.findOne (_:String, _:String)(_:TableName)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
     val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Roles.ROMCHARM_APP))
     val statusCode = status(result)
     val string = contentAsString(result)
@@ -65,7 +66,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("Family Controller must return Bad request when family already exists when saving") {
-    (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
+    (familiesRepo.findOne (_:String, _:String)(_:TableName)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
     val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ROMCHARM_APP)))
     val request = FakeRequest("POST", "/families/add", FakeHeaders(List("Authorization" -> token)), null).withJsonBody(Json.parse(defaultFamilyJson))
     val result: Future[Result] = controller.save().apply(request)
@@ -77,8 +78,8 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("Family Controller must save a valid family json") {
-    (familiesRepo.save (_:Family)(_:String)).when(defaultFamily, tableName).returns(defaultFamily)
-    (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
+    (familiesRepo.save (_:Family)(_:TableName)).when(defaultFamily, tableName).returns(defaultFamily)
+    (familiesRepo.findOne (_:String, _:String)(_:TableName)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
     val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ROMCHARM_APP)))
     val request = FakeRequest("POST", "/families/add", FakeHeaders(List("Authorization" -> token)), null).withJsonBody(Json.parse(defaultFamilyJson))
     val result: Future[Result] = controller.save.apply(request)

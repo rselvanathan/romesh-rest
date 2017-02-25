@@ -1,8 +1,9 @@
 package controllers
 
 import controllers.util.{LoginValidationWrapper, UserValidationWrapper}
-import defaults.Roles
+import defaults.{Roles, TableNames}
 import defaults.Roles.Role
+import defaults.TableNames.TableName
 import domain.{Login, User}
 import dynamoDB.tableFields.UsersFieldNames
 import org.scalamock.scalatest.MockFactory
@@ -22,7 +23,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   val PASSWORD = "password"
   val ROLE = "ROLE_ADMIN"
 
-  val tableName = "romcharm-userRoles"
+  val tableName = TableNames.USER_ROLES
   val repo = stub[UsersRepo]
   val controller = new UsersController(repo, LoginValidationWrapper, UserValidationWrapper)
 
@@ -33,7 +34,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When passing in login information and the information is correct return a Token") {
-    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
+    (repo.findOne (_:String, _:String)(_:TableName)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.authenticate.apply(request)
     val statusCode = status(future)
@@ -43,7 +44,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When passing in login information and the information and user is not found return NotFound") {
-    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
+    (repo.findOne (_:String, _:String)(_:TableName)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.authenticate.apply(request)
     val statusCode = status(future)
@@ -54,7 +55,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When passing in login information and the password is incorrect return NotFound") {
-    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(User(USERNAME, "newPass", ROLE)))
+    (repo.findOne (_:String, _:String)(_:TableName)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(User(USERNAME, "newPass", ROLE)))
     val request = FakeRequest().withJsonBody(Json.parse(defaultLoginJson))
     val future = controller.authenticate.apply(request)
     val statusCode = status(future)
@@ -65,8 +66,8 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When saving a user and the information is correct return a User object") {
-    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
-    (repo.save (_:User)(_:String)).when(defaultUser, tableName).returns(defaultUser)
+    (repo.findOne (_:String, _:String)(_:TableName)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
+    (repo.save (_:User)(_:TableName)).when(defaultUser, tableName).returns(defaultUser)
     val future = controller.saveUser.apply(getRequest(Roles.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)
     val result = contentAsJson(future)
@@ -83,7 +84,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When saving a user and the user already exists then return a 400 error with User already exists message") {
-    (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
+    (repo.findOne (_:String, _:String)(_:TableName)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
     val future = controller.saveUser.apply(getRequest(Roles.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)

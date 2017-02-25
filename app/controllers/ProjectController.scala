@@ -4,6 +4,7 @@ import com.google.inject.{Inject, Singleton}
 import controllers.actions.AuthAction
 import controllers.util.JsonValidationWrapper
 import defaults.ApiMethods._
+import defaults.TableNames
 import domain.Project
 import dynamoDB.tableFields.ProjectsFieldNames
 import play.api.libs.json.Json
@@ -17,7 +18,7 @@ import repositories.Repo
 class ProjectController @Inject() (repo : Repo[Project],
                                    jsonValidator : JsonValidationWrapper[Project]) extends Controller {
 
-  private implicit val tableName = "mypage-projects"
+  private implicit val tableName = TableNames.MYPAGE_PROJECTS
 
   def getProject(projectId : String) = (AuthAction andThen AuthAction.checkPermission(GET_PROJECT)) {
     val optionProject = repo.findOne(ProjectsFieldNames.PROJECT_ID, projectId)
