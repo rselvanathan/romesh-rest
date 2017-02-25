@@ -5,16 +5,15 @@ package defaults
   */
 object ApiMethods {
 
-  // Family API
-  val SAVE_FAMILY = "SAVE_FAMILY"
-  val GET_FAMILY = "GET_FAMILY"
-  
-  // User API
-  val SAVE_USER = "SAVE_USER"
-  val AUTH_USER = "AUTH_USER"
-  
-  // Projects API
-  val GET_PROJECT = "GET_PROJECT"
-  val GET_ALL_PROJECTS = "GET+ALL_PROJECTS"
-  val SAVE_PROJECT = "SAVE_PROJECT"
+  trait ApiMethod
+  // Family APIs
+  object SAVE_FAMILY extends ApiMethod
+  object GET_FAMILY extends ApiMethod
+  // User APIs
+  object SAVE_USER extends ApiMethod
+  object AUTH_USER extends ApiMethod
+  // Project APIs
+  object GET_PROJECT extends ApiMethod
+  object GET_ALL_PROJECTS extends ApiMethod
+  object SAVE_PROJECT extends ApiMethod
 }

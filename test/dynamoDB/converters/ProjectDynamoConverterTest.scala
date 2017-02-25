@@ -1,12 +1,12 @@
 package dynamoDB.converters
 
 import com.amazonaws.services.dynamodbv2.document.Item
+import defaults.ButtonTypes
 import domain.{GalleryLink, Project}
 import org.json4s.NoTypeHints
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatestplus.play.PlaySpec
 
 import scala.collection.JavaConverters._
 
@@ -22,7 +22,7 @@ class ProjectDynamoConverterTest extends FunSuite with Matchers {
   val PROJECT_ID = "starrage"
   val PROJECT_TITLE = "Star Rage"
   val TITLE_IMAGE_LINK = "linkTitle"
-  val BUTTON_TYPES = List("GITHUB", "DIRECT_LINK")
+  val BUTTON_TYPES = List(ButtonTypes.GITHUB, ButtonTypes.DIRECT_LINK)
   val GITHUB_LINK = "linkGit"
   val VIDEO_LINK = "videoLink"
   val GALLERY_LINKS_STRING = write(galleryLinks)
@@ -50,14 +50,33 @@ class ProjectDynamoConverterTest extends FunSuite with Matchers {
       result should be (expected)
     }
 
-  private def defaultProject(galleryLinks : Seq[GalleryLink]) = Project(PROJECT_ID, PROJECT_TITLE, TITLE_IMAGE_LINK, BUTTON_TYPES, GITHUB_LINK, VIDEO_LINK, galleryLinks, DIRECT_LINK, ORDER)
+  test("When None of the optional fields are set in the Dynamo Table return None's for those fields") {
+    val exprectProject = Project(PROJECT_ID, PROJECT_TITLE, None, None, None, None, None, None, Some(0))
+    val item = new Item().withString("projectId", PROJECT_ID)
+      .withString("projectTitle", PROJECT_TITLE)
+      .withInt("order", 0)
+
+    val result = ProjectDynamoConverter(item)
+    result should be (exprectProject)
+  }
+
+  private def defaultProject(galleryLinks : Seq[GalleryLink]) =
+    Project(PROJECT_ID,
+      PROJECT_TITLE,
+      Option(TITLE_IMAGE_LINK),
+      Option(BUTTON_TYPES),
+      Option(GITHUB_LINK),
+      Option(VIDEO_LINK),
+      Option(galleryLinks),
+      Option(DIRECT_LINK),
+      Option(ORDER))
 
   private def defaultItem(galleryLinks : String) = {
     if(galleryLinks != null) {
       new Item().withString("projectId", PROJECT_ID)
         .withString("projectTitle", PROJECT_TITLE)
         .withString("titleImageLink", TITLE_IMAGE_LINK)
-        .withList("buttonTypes", BUTTON_TYPES.asJava)
+        .withList("buttonTypes", BUTTON_TYPES.map(ButtonTypes.buttonTypeToString).asJava)
         .withString("githubLink", GITHUB_LINK)
         .withString("videoLink", VIDEO_LINK)
         .withString("galleryLinks", galleryLinks)
@@ -67,7 +86,7 @@ class ProjectDynamoConverterTest extends FunSuite with Matchers {
       new Item().withString("projectId", PROJECT_ID)
         .withString("projectTitle", PROJECT_TITLE)
         .withString("titleImageLink", TITLE_IMAGE_LINK)
-        .withList("buttonTypes", BUTTON_TYPES.asJava)
+        .withList("buttonTypes", BUTTON_TYPES.map(ButtonTypes.buttonTypeToString).asJava)
         .withString("githubLink", GITHUB_LINK)
         .withString("videoLink", VIDEO_LINK)
         .withString("directLink", DIRECT_LINK)

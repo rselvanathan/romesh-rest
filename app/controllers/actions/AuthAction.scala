@@ -1,6 +1,8 @@
 package controllers.actions
 
 import akka.util.ByteString
+import defaults.ApiMethods.ApiMethod
+import defaults.Roles
 import play.api.http.HttpEntity
 import play.api.mvc._
 import security.{JWTUtil, PermissionRules, UserRequest}
@@ -12,9 +14,9 @@ import scala.concurrent.Future
   */
 object AuthAction extends ActionBuilder[UserRequest] with ActionRefiner[Request, UserRequest]{
 
-  def checkPermission(methodName : String) = new ActionRefiner[UserRequest, UserRequest] {
+  def checkPermission(methodName : ApiMethod) = new ActionRefiner[UserRequest, UserRequest] {
     override protected def refine[A](request: UserRequest[A]): Future[Either[Result, UserRequest[A]]] = Future.successful {
-      if(PermissionRules(methodName, request.role)) Right(request)
+      if(PermissionRules(methodName, Roles.getRole(request.role))) Right(request)
       else Left(forbidden("Not Allowed"))
     }
   }
@@ -33,7 +35,7 @@ object AuthAction extends ActionBuilder[UserRequest] with ActionRefiner[Request,
 
   private def forbidden(text : String) = {
     Result(
-      header = ResponseHeader(401, Map.empty),
+      header = ResponseHeader(403, Map.empty),
       body = HttpEntity.Strict(ByteString(text), Some("text/plain"))
     )
   }

@@ -7,3 +7,6 @@ POST    /families/add          	controllers.FamiliesController.save
 # /users endpoints
 POST 	/users/auth				controllers.UsersController.authenticate
 POST    /users/add              controllers.UsersController.saveUser
+
+# /projects endpoints
+GET     /projects/:projectId    controllers.ProjectController.getProject(projectId : String)

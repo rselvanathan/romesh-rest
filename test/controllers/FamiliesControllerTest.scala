@@ -1,12 +1,13 @@
 package controllers
 
 import controllers.util.FamilyValidationWrapper
-import defaults.Role
+import defaults.Roles
+import defaults.Roles.Role
 import domain.{Family, User}
 import dynamoDB.tableFields.FamiliesFieldNames
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{Result, Results}
 import play.api.test.Helpers._
 import play.api.test._
@@ -38,7 +39,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
 
   test("Family Controller must return a 'Not Found' response when email is not found") {
       (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
-      val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Role.ROMCHARM_APP))
+      val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Roles.ROMCHARM_APP))
       val statusCode = status(result)
       val string = contentAsString(result)
 
@@ -48,7 +49,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
 
   test("Family Controller must return a Success response when email is found with correct json") {
     (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
-    val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Role.ROMCHARM_APP))
+    val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Roles.ROMCHARM_APP))
     val statusCode = status(result)
     val string = contentAsString(result)
 
@@ -57,15 +58,15 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("If find is called with a role other than ROMCHARM or Admin then expect a Forbidden response") {
-    val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Role.MYPAGE_APP))
+    val result: Future[Result] = controller.findFamily(EMAIL).apply(getRequest(Roles.MYPAGE_APP))
     val statusCode = status(result)
 
-    statusCode should be (401)
+    statusCode should be (403)
   }
 
   test("Family Controller must return Bad request when family already exists when saving") {
     (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(Some(defaultFamily))
-    val token = JWTUtil.generateToken(User("romesh", "password", Role.ROMCHARM_APP))
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ROMCHARM_APP)))
     val request = FakeRequest("POST", "/families/add", FakeHeaders(List("Authorization" -> token)), null).withJsonBody(Json.parse(defaultFamilyJson))
     val result: Future[Result] = controller.save().apply(request)
     val statusCode = status(result)
@@ -78,7 +79,7 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   test("Family Controller must save a valid family json") {
     (familiesRepo.save (_:Family)(_:String)).when(defaultFamily, tableName).returns(defaultFamily)
     (familiesRepo.findOne (_:String, _:String)(_:String)).when(FamiliesFieldNames.EMAIL, EMAIL, tableName).returns(None)
-    val token = JWTUtil.generateToken(User("romesh", "password", Role.ROMCHARM_APP))
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.ROMCHARM_APP)))
     val request = FakeRequest("POST", "/families/add", FakeHeaders(List("Authorization" -> token)), null).withJsonBody(Json.parse(defaultFamilyJson))
     val result: Future[Result] = controller.save.apply(request)
     val statusCode = status(result)
@@ -89,16 +90,16 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
   }
 
   test("If save is called with a role other than ROMCHARM or Admin then expect a Forbidden response") {
-    val token = JWTUtil.generateToken(User("romesh", "password", Role.MYPAGE_APP))
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(Roles.MYPAGE_APP)))
     val request = FakeRequest("POST", "/families/add", FakeHeaders(List("Authorization" -> token)), null).withJsonBody(Json.parse(defaultFamilyJson))
     val result: Future[Result] = controller.save.apply(request)
     val statusCode = status(result)
 
-    statusCode should be (401)
+    statusCode should be (403)
   }
 
-  def getRequest(role : String) = {
-    val token = JWTUtil.generateToken(User("romesh", "password", role))
+  def getRequest(role : Role) = {
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(role)))
     FakeRequest("GET", "/", FakeHeaders(List("Authorization" -> token).asInstanceOf[Seq[(String, String)]]), null)
   }
 

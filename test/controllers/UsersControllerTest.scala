@@ -1,7 +1,8 @@
 package controllers
 
 import controllers.util.{LoginValidationWrapper, UserValidationWrapper}
-import defaults.Role
+import defaults.Roles
+import defaults.Roles.Role
 import domain.{Login, User}
 import dynamoDB.tableFields.UsersFieldNames
 import org.scalamock.scalatest.MockFactory
@@ -66,7 +67,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   test("When saving a user and the information is correct return a User object") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(None)
     (repo.save (_:User)(_:String)).when(defaultUser, tableName).returns(defaultUser)
-    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse(defaultUserJson)))
+    val future = controller.saveUser.apply(getRequest(Roles.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)
     val result = contentAsJson(future)
 
@@ -75,7 +76,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("When saving a user and the body is incorrect return a Bad Request") {
-    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse("{}")))
+    val future = controller.saveUser.apply(getRequest(Roles.ADMIN, Json.parse("{}")))
     val statusCode = status(future)
 
     statusCode should be (400)
@@ -84,7 +85,7 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   test("When saving a user and the user already exists then return a 400 error with User already exists message") {
     (repo.findOne (_:String, _:String)(_:String)).when(UsersFieldNames.USERNAME, USERNAME, tableName).returns(Some(defaultUser))
     val request = FakeRequest().withJsonBody(Json.parse(defaultUserJson))
-    val future = controller.saveUser.apply(getRequest(Role.ADMIN, Json.parse(defaultUserJson)))
+    val future = controller.saveUser.apply(getRequest(Roles.ADMIN, Json.parse(defaultUserJson)))
     val statusCode = status(future)
     val result = contentAsString(future)
 
@@ -93,18 +94,18 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
   }
 
   test("Only allow saving user as ADMIN") {
-    val future = controller.saveUser.apply(getRequest(Role.MYPAGE_APP, Json.parse("{}")))
+    val future = controller.saveUser.apply(getRequest(Roles.MYPAGE_APP, Json.parse("{}")))
     val statusCode = status(future)
 
-    val futureTwo = controller.saveUser.apply(getRequest(Role.ROMCHARM_APP, Json.parse("{}")))
+    val futureTwo = controller.saveUser.apply(getRequest(Roles.ROMCHARM_APP, Json.parse("{}")))
     val statusCodeTwo = status(futureTwo)
 
-    statusCodeTwo should be (401)
-    statusCode should be (401)
+    statusCodeTwo should be (403)
+    statusCode should be (403)
   }
 
-  def getRequest(role : String, jsValue : JsValue) = {
-    val token = JWTUtil.generateToken(User("romesh", "password", role))
+  def getRequest(role : Role, jsValue : JsValue) = {
+    val token = JWTUtil.generateToken(User("romesh", "password", Roles.getRoleString(role)))
     FakeRequest("GET", "/users/add", FakeHeaders(List("Authorization" -> token).asInstanceOf[Seq[(String, String)]]), null).withJsonBody(jsValue)
   }
 

@@ -1,7 +1,7 @@
 package controllers.util
 
 import akka.util.ByteString
-import domain.{Family, Login, User}
+import domain.{Family, Login, Project, User}
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsError, JsResult, JsSuccess, JsValue}
 import play.api.mvc.{ResponseHeader, Result}
@@ -47,4 +47,8 @@ object LoginValidationWrapper extends JsonValidationWrapper[Login] {
 
 object UserValidationWrapper extends JsonValidationWrapper[User] {
   override protected def validate(implicit jsValue: Option[JsValue]): JsResult[User] = jsValue.get.validate[User]
+}
+
+object ProjectValidationWrapper extends JsonValidationWrapper[Project] {
+  override protected def validate(implicit jsValue: Option[JsValue]): JsResult[Project] = jsValue.get.validate[Project]
 }
