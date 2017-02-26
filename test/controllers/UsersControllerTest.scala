@@ -31,6 +31,8 @@ class UsersControllerTest extends FunSuite with Matchers with MockFactory with B
     sys.props.put("JWTSECRET", "secret")
     sys.props.put("AWS_ACCESS_KEY_ID", "access")
     sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
+    sys.props.put("AWS_EMAIL_SNS_TOPIC", "TOPIC")
+    sys.props.put("APP_TYPE", "APP")
   }
 
   test("When passing in login information and the information is correct return a Token") {

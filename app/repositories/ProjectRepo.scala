@@ -67,7 +67,7 @@ class ProjectRepo @Inject() (dynamoDB : DynamoDB, dynamoDBConverter: DynamoDBCon
 
   private def processExistingProject(projectToSave : Project, exsitingProject : Project,currentOrderedProjects : Seq[Project])(implicit tableName: TableName) : Project = {
     // Project has not order defined, then set it to the same as before
-    if (projectToSave.order.get <= 0) {
+    if (projectToSave.order.isEmpty || projectToSave.order.get <= 0) {
       return getNewOrderProject(projectToSave, exsitingProject.order.get)
     }
     // Project moved further down the list - then move objects that are between, its old and new position including the
@@ -90,7 +90,7 @@ class ProjectRepo @Inject() (dynamoDB : DynamoDB, dynamoDBConverter: DynamoDBCon
     projectToSave
   }
 
-  private def doesProjectHaveValidOrderNumber(project: Project, currentProjectListSize : Int) = project.order.get <= 0 || currentProjectListSize < project.order.get
+  private def doesProjectHaveValidOrderNumber(project: Project, currentProjectListSize : Int) = project.order.isEmpty || project.order.get <= 0 || currentProjectListSize < project.order.get
 
   private def saveProjectsWithNewOrder(projectList : Seq[Project], subListInclusiveStart : Int, subListExclusiveEnd : Int, increment : Boolean)(implicit tableName: TableName) = {
     projectList.slice(subListInclusiveStart, subListExclusiveEnd).foreach({ projectToSave =>

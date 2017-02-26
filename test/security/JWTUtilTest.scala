@@ -16,6 +16,8 @@ class JWTUtilTest extends FunSuite with Matchers with BeforeAndAfterAll {
     sys.props.put("JWTSECRET", "secret")
     sys.props.put("AWS_ACCESS_KEY_ID", "access")
     sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
+    sys.props.put("AWS_EMAIL_SNS_TOPIC", "TOPIC")
+    sys.props.put("APP_TYPE", "APP")
   }
 
   test("Token generated should be a non empty token") {

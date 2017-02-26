@@ -6,6 +6,7 @@ import defaults.Roles.Role
 import defaults.TableNames.TableName
 import domain.{Family, User}
 import dynamoDB.tableFields.FamiliesFieldNames
+import notification.EmailNotificationService
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, FunSuite, Matchers}
 import play.api.libs.json.Json
@@ -30,12 +31,15 @@ class FamiliesControllerTest extends FunSuite with Matchers with MockFactory wit
 
   val tableName = TableNames.ROMCHARM_FAMILY
   val familiesRepo = stub[FamiliesRepo]
-  val controller = new FamiliesController(familiesRepo,FamilyValidationWrapper)
+  val notifier = stub[EmailNotificationService]
+  val controller = new FamiliesController(familiesRepo,notifier,FamilyValidationWrapper)
 
   override def beforeAll = {
     sys.props.put("JWTSECRET", "secret")
     sys.props.put("AWS_ACCESS_KEY_ID", "access")
     sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
+    sys.props.put("AWS_EMAIL_SNS_TOPIC", "TOPIC")
+    sys.props.put("APP_TYPE", "APP")
   }
 
   test("Family Controller must return a 'Not Found' response when email is not found") {

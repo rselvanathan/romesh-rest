@@ -40,6 +40,8 @@ class ProjectControllerTest extends FunSuite with Matchers with MockFactory with
     sys.props.put("JWTSECRET", "secret")
     sys.props.put("AWS_ACCESS_KEY_ID", "access")
     sys.props.put("AWS_SECRET_ACCESS_KEY", "aws")
+    sys.props.put("AWS_EMAIL_SNS_TOPIC", "TOPIC")
+    sys.props.put("APP_TYPE", "APP")
   }
 
   test("Project Controller must return a 404 response when email is not found") {

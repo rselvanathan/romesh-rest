@@ -35,10 +35,10 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
 
     val projectList = projectRepo.findAll
 
-    projectList should be (List(defaultProject(1), defaultProject(2)))
+    projectList should be (List(defaultProject(Option(1)), defaultProject(Option(2))))
   }
 
-  test("When Saving a Project with Order Number 0 and the Projects retrieved Is Empty then jus add as first in order"){
+  test("When Saving a Project with no Order Number and the Projects retrieved Is Empty then jus add as first in order"){
     before
     val iteratorSupport = mock[IteratorSupport[Item, ScanOutcome]]
     val itemCollection = mock[ItemCollection[ScanOutcome]]
@@ -47,7 +47,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToSave", 0))
+    projectRepo.save(getProject("projectToSave", None))
 
     verify(table).putItem(getItem("projectToSave", 1))
   }
@@ -61,7 +61,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToSave", 5))
+    projectRepo.save(getProject("projectToSave", Option(5)))
 
     verify(table).putItem(getItem("projectToSave", 1))
   }
@@ -76,7 +76,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToSave", 0))
+    projectRepo.save(getProject("projectToSave", None))
 
     verify(table).putItem(getItem("projectToSave", 2))
   }
@@ -91,7 +91,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToSave", 10))
+    projectRepo.save(getProject("projectToSave", Option(10)))
 
     verify(table).putItem(getItem("projectToSave", 2))
   }
@@ -107,7 +107,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToSave", 2))
+    projectRepo.save(getProject("projectToSave", Option(2)))
 
     verify(table).putItem(getItem("projectToSave", 2))
     verify(table).putItem(getItem("two", 3))
@@ -124,7 +124,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToReplace", 2))
+    projectRepo.save(getProject("projectToReplace", Option(2)))
 
     verify(table).putItem(getItem("projectToReplace", 2))
     verify(table, never()).putItem(getItem("three", 4))
@@ -140,7 +140,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToReplace", 0))
+    projectRepo.save(getProject("projectToReplace", None))
 
     verify(table).putItem(getItem("projectToReplace", 2))
     verify(table, never()).putItem(getItem("three", 4))
@@ -157,7 +157,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToReplace", 5))
+    projectRepo.save(getProject("projectToReplace", Option(5)))
 
     verify(table).putItem(getItem("projectToReplace", 3))
     verify(table).putItem(getItem("two", 1))
@@ -176,7 +176,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToMove", 5))
+    projectRepo.save(getProject("projectToMove", Option(5)))
 
     verify(table).putItem(getItem("projectToMove", 5))
     verify(table).putItem(getItem("three", 2))
@@ -200,7 +200,7 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     when(itemCollection.iterator).thenReturn(iteratorSupport)
     when(table.scan(any(classOf[ScanSpec]))).thenReturn(itemCollection)
 
-    projectRepo.save(getProject("projectToMove", 2))
+    projectRepo.save(getProject("projectToMove", Option(2)))
 
     verify(table).putItem(getItem("projectToMove", 2))
     verify(table).putItem(getItem("two", 3))
@@ -211,15 +211,14 @@ class ProjectRepoTest extends FunSuite with Matchers with MockitoSugar {
     verify(table, never).putItem(getItem("one", 1))
   }
 
-//  def before = (dynamoDB.getTable _).when(TableNames.getTableName(TABLENAME)).returns(table)
   def before = {
     reset(table)
     when(dynamoDB.getTable(TableNames.getTableName(TABLENAME))).thenReturn(table)
   }
 
   def defaultItem(order : Int) = getItem("ProjectId", order)
-  def defaultProject(order : Int) = getProject("ProjectId", order)
+  def defaultProject(order : Option[Int]) = getProject("ProjectId", order)
 
-  def getProject(projectID : String, order : Int) = Project(projectID, "ProjectTitle", None, None, None, None, None, None, Option(order))
+  def getProject(projectID : String, order : Option[Int]) = Project(projectID, "ProjectTitle", None, None, None, None, None, None, order)
   def getItem(projectId : String, order : Int) = new Item().withString("projectId", projectId).withString("projectTitle", "ProjectTitle").withInt("order", order)
 }

@@ -141,6 +141,14 @@ class ProjectTest extends FunSuite with Matchers {
     value.toString() should be (expectedJson)
   }
 
+  test("Minimal Project Json into should return the expected class") {
+    val json = s"""{"projectId":"$PROJECT_ID","projectTitle":"$PROJECT_TITLE"}"""
+    val project = Project(PROJECT_ID, PROJECT_TITLE, None, None, None, None, None, None, None)
+
+    val result = Json.parse(json).as[Project]
+    result should be (project)
+  }
+
   private def assertProjectJson(jsonString : String) = {
     val json = Json.parse(jsonString)
     val result = json.validate[Project]

@@ -7,6 +7,7 @@ import defaults.ApiMethods._
 import defaults.TableNames
 import domain.Family
 import dynamoDB.tableFields.FamiliesFieldNames
+import notification.EmailNotificationService
 import play.api.libs.json.Json
 import play.api.mvc.Controller
 import repositories.Repo
@@ -17,6 +18,7 @@ import repositories.Repo
   */
 @Singleton
 class FamiliesController @Inject() ( repo : Repo[Family],
+                                     notifier : EmailNotificationService,
                                      jsonValidationWrapper : JsonValidationWrapper[Family]) extends Controller {
 
   implicit val tableName = TableNames.ROMCHARM_FAMILY
@@ -36,7 +38,8 @@ class FamiliesController @Inject() ( repo : Repo[Family],
       val familyFound = repo.findOne(FamiliesFieldNames.EMAIL, family.email)
       if(familyFound.isEmpty) {
         val familySaved : Family = repo.save(family)
-        Created(Json.toJson(familySaved))
+        notifier.sendEmailNotification(familySaved)
+        Created(Json.toJson(repo.save(familySaved)))
       } else {
         BadRequest("Family already exists")
       }
