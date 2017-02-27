@@ -1,6 +1,6 @@
-FROM develar/java
-ADD target/scala-2.11/romesh-rest_2.11-1.0.jar app.jar
+FROM java:openjdk-8
+ADD target/universal/romesh-rest-1.0.zip /
+RUN unzip -q /romesh-rest-1.0.zip && sh -c 'chmod +x /romesh-rest-1.0/bin/romesh-rest'
 EXPOSE 9000
-RUN sh -c 'touch /app.jar'
 ENV JAVA_OPTS=""
-ENTRYPOINT ["sh", "-c", "java -jar /app.jar"]
+ENTRYPOINT ["sh", "-c", "./romesh-rest-1.0/bin/romesh-rest"]
