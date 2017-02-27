@@ -1,0 +1,36 @@
+notifications:
+  email:
+    recipients:
+     - romeshselvan@hotmail.co.uk
+
+    on_success: never
+    on_failure: change
+
+# safelist
+branches:
+  only:
+  - master
+
+language: scala
+scala:
+  - 2.11.8
+sudo: required
+services:
+  - docker
+
+# Build the Scala app
+jdk:
+  - oraclejdk8
+script:
+ - sbt compile
+ - sbt test
+ - sbt dist
+
+#Build the Docker image and push to registry
+after_success:
+  - docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+  - docker build -t rselvanathan/romesh-rest:latest .
+  - docker push rselvanathan/romesh-rest
+  # Deploy to instance
+  - openssl aes-256-cbc -K "$ENCRYPT_K" -iv "$ENCRYPT_IV" -in "./deploy_key.enc" -out "./deploy_key" -d
+  - chmod 600 ./deploy_key && ssh -o StrictHostKeyChecking=no -i ./deploy_key $SSH_USER@$SSH_IP './deploy-romesh-rest.sh'
