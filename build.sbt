@@ -10,6 +10,7 @@ libraryDependencies += "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.90"
 libraryDependencies += "com.amazonaws" % "aws-java-sdk-sns" % "1.11.90"
 libraryDependencies += "org.json4s" % "json4s-native_2.11" % "3.5.0"
 libraryDependencies += "io.jsonwebtoken" % "jjwt" % "0.7.0"
+libraryDependencies += filters
 
 // Test Dependencies
 
