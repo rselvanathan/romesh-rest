@@ -2,7 +2,7 @@
 
 # /families endpoints
 GET     /families/:email       	controllers.FamiliesController.findFamily(email : String)
-POST    /families/add          	controllers.FamiliesController.save
+POST    /families/family        controllers.FamiliesController.save
 
 # /users endpoints
 POST 	/users/auth				controllers.UsersController.authenticate
@@ -11,4 +11,7 @@ POST    /users/add              controllers.UsersController.saveUser
 # /projects endpoints
 GET     /projects/:projectId    controllers.ProjectController.getProject(projectId : String)
 GET     /projects               controllers.ProjectController.getAllProjects
-POST    /projects/save          controllers.ProjectController.save
+POST    /projects/add          	controllers.ProjectController.save
+
+# /health endpoint
+GET 	/health					controllers.HealthController.health
